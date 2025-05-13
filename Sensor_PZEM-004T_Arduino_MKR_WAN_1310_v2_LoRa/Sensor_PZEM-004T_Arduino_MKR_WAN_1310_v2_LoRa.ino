@@ -4,7 +4,7 @@
 PZEM004Tv30* pzem;    // Se declara un puntero a un objeto PZEM004Tv30
 LoRaModem modem;    // Objeto para manejar el módem LoRa
 bool joined;    // Variable que indica si se ha unido exitosamente a la red LoRaWAN
-const String appEui = "0000000000000000", appKey = "BBD5B696A423BFB8D92E45270E58F5E9";    // App EUI y App Key
+const String appEui = "YOUR_APPEUI", appKey = "YOUR_KEY";    // App EUI y App Key
 
 void setup() {
   delay(3000);    // Tiempo para que el IDE abra el puerto serie

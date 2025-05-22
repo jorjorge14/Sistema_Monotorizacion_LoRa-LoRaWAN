@@ -1,32 +1,33 @@
-#include <MKRWAN.h>
+#include <MKRWAN.h>   // Librería para gestionar la conectividad LoRaWAN en placas Arduino MKR
 
-LoRaModem modem;
-const int lm35Pin = A1;  // Pin analógico donde conectamos la salida del LM35
+LoRaModem modem;    // Objeto para manejar el módem LoRa
+const int lm35Pin = A1;  // Pin analógico donde se conecta la salida del LM35
+
+// Credenciales para unirse a la red LoRaWAN con OTAA
+String appEui = "APPEUI";   // App EUI
+String appKey = "APPKEY";   // App Key
 
 void setup() {
-  Serial.begin(115200);
-  while (!Serial);
+  Serial.begin(115200);   // Iniciar la comunicación por USB para ver mensajes de depuración
+  while (!Serial);    // Esperar a que el puerto serie esté listo
 
   Serial.println("Iniciando prueba con LM35 y LoRaWAN");
   
   // Inicializa el módem en la banda EU868 
   if (!modem.begin(EU868)) {
     Serial.println("Error al iniciar el módulo LoRaWAN");
-    while(1);
+    while(1);   // Si hay error, detener el programa aquí
   }
   
-  // Para unirse a la red se puede usamos OTAA 
-  String appEui = "YOUR_APPEUI";   // App EUI
-  String appKey = "YOUR_APPKEY";   // App Key
-
-  Serial.println("Intentando unirse a la red vía OTAA...");
+  // Intenta unirse a la red LoRaWAN mediante OTAA con las credenciales
   if (!modem.joinOTAA(appEui, appKey)) {
     Serial.println("Error al unirse a la red. Revisa tu configuración o posición del nodo.");
-    while(1);
+    while(1);   // Si no puede unirse, se detener el programa
   }
+  
   Serial.println("¡Conectado a la red LoRaWAN!");
 
-  // Enviar mensaje inicial de prueba
+  // Enviar mensaje inicial de prueba para confirmar funcionamiento
   modem.beginPacket();
   modem.print("Inicio LM35");
   int err = modem.endPacket(true);
@@ -38,19 +39,17 @@ void setup() {
 }
 
 void loop() {
-  // Lectura del LM35
-  int sensorValue = analogRead(lm35Pin);
-  // Convertir la lectura (0-1023) a voltaje (usando 3.3V como referencia)
-  float voltage = sensorValue * (3.3 / 1023.0);
-  // El LM35 entrega 10 mV/°C; con 3.3V de referencia, el valor en °C es:
-  float temperatureC = voltage * 100;  // (voltage en V * 100 = temperatura en °C)
   
-  // Mostrar el valor
+  int sensorValue = analogRead(lm35Pin);   // Lectura analógica del LM35  
+  float voltage = sensorValue * (3.3 / 4095.0);   //Convertir la lectura (0-4095) a voltaje (usando 3.3V como referencia)
+  float temperatureC = voltage * 100.0;   // Convertir el voltaje a temperatura en ºC (10mV = 1ºC)
+
+  // Mostrar el valor por consola para depuración
   Serial.print("Temperatura: ");
   Serial.print(temperatureC);
   Serial.println(" °C");
   
-  // Enviar la medida por LoRaWAN
+  // Enviar la medida de temperatura a través de LoRaWAN
   modem.beginPacket();
   modem.print("Temp:");
   modem.print(temperatureC);
@@ -62,6 +61,7 @@ void loop() {
     Serial.println("Error al enviar el mensaje.");
   }
   
-  delay(10000);  // Espera 10 segundos entre mediciones
+  delay(10000);  // Espera 10 segundos entre lecturas
 }
+
 

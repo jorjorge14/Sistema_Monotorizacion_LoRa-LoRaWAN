@@ -6,13 +6,11 @@ LoRaModem modem;    // Objeto para manejar el módem LoRa
 PZEM004Tv30* pzem;    // Puntero a un objeto PZEM004Tv30
 bool joined;    // Variable que indica si se ha unido exitosamente a la red LoRaWAN
 
-
 // Credenciales para unirse a la red LoRaWAN con OTAA
 String appEui = "APPEUI";   // App EUI
 String appKey = "APPKEY";   // App Key
 
 const float precioPorKWh = 0.187;  // Precio de energía basado en factura ejemplo: 27,24 € / 146 kWh ≈ 0,187 €/kWh
-
 
 float energiaAnterior = 0.0;    // Energía acumulada en la lectura anterior (Wh)
 float energiaAcumulada = 0.0;   // Energía total acumulada entre envíos (Wh)
@@ -23,13 +21,12 @@ int lecturasRealizadas = 0;   // Contador de lecturas entre envíos de resumen
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);   // Configurar el LED integrado en la placa para indicar envíos
 
-  Serial1.begin(9600);  // Iniciar el puerto serie para mostrar información por el monitor serie
+  Serial1.begin(9600);  // Inicializar PZEM por Serial1 (pines 13 TX, 14 RX)
   pzem = new PZEM004Tv30(Serial1);    //Crear el objeto PZEM
 
-  // Iniciar el módem en la banda EU868 y se une a la red LoRaWAN mediante OTAA con
+  // Iniciar el módem en la banda EU868 y se une a la red LoRaWAN mediante OTAA con las credenciales
   modem.begin(EU868);
   joined = modem.joinOTAA(appEui, appKey);
-
   if (joined) {
     modem.setPort(1);   // Configurar el puerto de aplicación a 1
     modem.minPollInterval(60);  // Establecer el intervalo mínimo entre transmisiones a 60 segundos 
@@ -51,13 +48,15 @@ void loop() {
     uint16_t energiaWh = energiaConsumida * 1000;  // Lecturas de la energía consumida en 30 min. Convertir a Wh (kWh * 1000)
     uint16_t costeCent = coste * 100;              // Lecturas del coste estimado en 30 min. Convertir a céntimos (€ * 100)
 
-    byte payload[4];    //Paquete de 4 bytes para enviar (2 bytes para energía y 2 bytes para coste)
+    // Paquete de 4 bytes para enviar (2 bytes para energía y 2 bytes para coste)
+    byte payload[4];    
     payload[0] = highByte(energiaWh);   // Byte alto de energía
     payload[1] = lowByte(energiaWh);    // Byte bajo de energía
     payload[2] = highByte(costeCent);   // Byte alto de coste
     payload[3] = lowByte(costeCent);    // Byte bajo de coste
 
-    if (joined) {   //Si se ha unido a la red LoRaWAN, enviar el paquete
+    // Si se ha unido a la red LoRaWAN, enviar el paquete
+    if (joined) {   
       modem.beginPacket();
       modem.write(payload, 4);    
       modem.endPacket(true);
@@ -75,14 +74,16 @@ void loop() {
       uint16_t totalWh = energiaAcumulada * 1000; // Lecturas de la energía acumulada en 2 h. Convertir a Wh (kWh * 1000)
       uint16_t totalCent = costeAcumulado * 100;    // Lecturas del coste acumulado en 2 h. Convertir a céntimos (€ * 100)
 
-      byte resumen[5];    //Paquete de 5 bytes para enviar (2 bytes para energía, 2 bytes para coste y 1 byte para identificar)
+      // Paquete de 5 bytes para enviar (2 bytes para energía, 2 bytes para coste y 1 byte para identificar)
+      byte resumen[5];    
       resumen[0] = 0xFF;  // Identificador del paquete resumen
       resumen[1] = highByte(totalWh);   // Byte alto de energía
       resumen[2] = lowByte(totalWh);    // Byte bajo de energía
       resumen[3] = highByte(totalCent);   // Byte alto de coste
       resumen[4] = lowByte(totalCent);    // Byte bajo de coste
 
-      modem.beginPacket();   // Enviar el paquete resumen a la red LoRaWAN 
+      // Enviar el paquete resumen a la red LoRaWAN 
+      modem.beginPacket();   
       modem.write(resumen, 5);
       modem.endPacket(true);
 
@@ -95,6 +96,6 @@ void loop() {
 
   // Modo bajo consumo: duerme 30 min en ciclos de 1 min
   for (int i = 0; i < 30; i++) {
-    LowPower.sleep(60000);  // Duerme 60 000 ms = 1 minuto
+    LowPower.sleep(60000);  // Duerme 1 minuto (=60.000 ms) 
   }
 }

@@ -1,4 +1,2 @@
 # Sistema_Medicion_LORA
-TFG sobre LORA/LORAWAN.
-
-Usando Arduino MKR WAN 1310 en la banda de 868 MHz (Europa)
+Este proyecto es un sistema para medir el consumo eléctrico usando un sensor PZEM-004T V3.0 y un Arduino MKR WAN 1310 que envía los datos diarios vía LoRaWAN. Cada día se manda el consumo y su coste, y al final del mes se envía un resumen con el total acumulado. Además, el dispositivo entra en modo de bajo consumo para ahorrar batería y poder funcionar largo tiempo sin intervención. Ideal para monitorizar energía de forma sencilla y eficiente usando tecnología IoT.

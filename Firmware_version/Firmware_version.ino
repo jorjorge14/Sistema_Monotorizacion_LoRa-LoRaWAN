@@ -13,7 +13,7 @@ void setup() {
   
   Serial.print("Firmware version: "); // Si el módem inicia correctamente, muestra la versión del firmware del módem
   Serial.println(modem.version());
+  Serial.print("Your device EUI is: "); // Muestra el EUI del dispositivo
+  Serial.println(modem.deviceEUI());
 }
-
-void loop() {
-}
+void loop() {}
